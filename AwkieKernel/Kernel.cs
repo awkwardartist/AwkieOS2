@@ -1,79 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Text;
+using System.Net;
 using System.IO;
-using System.Threading;
+using System.Reflection.Emit;
 using Sys = Cosmos.System;
 
 namespace AwkieKernel
 {
     public class Kernel : Sys.Kernel
     {
-        public Sys.FileSystem.FileSystemFactory systemFactory;
+        WebClient client = new WebClient();
+        Sys.FileSystem.CosmosVFS fs = new Sys.FileSystem.CosmosVFS();
+        
         protected override void BeforeRun()
         {
             Console.Clear();
             Console.WriteLine("Boot Success!!");
+            Console.WriteLine("Setting up VFS");
             
-
+            Sys.FileSystem.VFS.VFSManager.RegisterVFS(fs);
+            
+           
+            
         }
-        
+
         protected override void Run()
         {
-            Devices:
-            Console.WriteLine("I detect: " + Cosmos.HAL.BlockDevice.Partition.Devices.Count + " partition devices, please choose\none for your filesystem to go in:");
-            foreach(var part in Cosmos.HAL.BlockDevice.Partition.Devices)
-            {
-                Console.WriteLine(part);
-            }
-
-            Console.Write(">>");
-            Cosmos.HAL.BlockDevice.BlockDevice blockdevice = Cosmos.HAL.BlockDevice.Partition.Devices[0];
-            string name = Console.ReadLine();
-            bool def = true;
-            foreach (var part in Cosmos.HAL.BlockDevice.Partition.Devices)
-            {
-                if (name == part.ToString())
-                {
-                    blockdevice = part;
-                    def = false;
-                }
-            }
-            if (def)
-            {
-            def:
-                Console.WriteLine("your name didnt match any listed block devices,\nretry or go with default (" + Cosmos.HAL.BlockDevice.Partition.Devices[0] + ") type retry / cont");
-                Console.Write(">>");
-                var input = Console.ReadLine();
-                if(input == "retry")
-                {
-                    goto Devices;
-                } else if(input == "cont")
-                {
-
-                }
-                else
-                {
-                    Console.WriteLine("type retry or cont!!");
-                }
-            }
-
-            Console.WriteLine("Formatting drive... this will wipe it. Continue?? (y/n)");
-            Console.Write(">>");
-
             
-            if(Console.ReadLine() == "n")
+            
+            Console.WriteLine("root Dirs:");
+            foreach(var volume in fs.GetVolumes())
             {
-                Console.Clear();
-                goto Devices;
+                Console.WriteLine(volume.mName);
+                Console.WriteLine("size:");
+                Console.WriteLine(volume.mSize);
+
             }
+            Console.WriteLine("\n\n");
+            Console.WriteLine("creating necissary files in boot filesystem...");
 
-
-
-
+            Console.WriteLine("creating a new filesystem...");
+            
+            
+            Console.ReadKey();
         }
     }
 }
